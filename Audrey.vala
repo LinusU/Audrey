@@ -1,5 +1,6 @@
 using Gtk;
 using Gst;
+using GLib;
 
 public class PlayPauseButton : Button {
     
@@ -47,6 +48,7 @@ public class Audrey : Window {
     private Box hbox;
     
     private Scale scale;
+    private AspectFrame aspect_frame;
     private DrawingArea drawing_area;
     
     private Pipeline pipeline;
@@ -59,31 +61,41 @@ public class Audrey : Window {
     private VolumeButton btn_volu;
     private FullscreenButton btn_full;
     private Button btn_sett;
-
+    
+    const TargetEntry[] targets = {
+        { "text/uri-list", 0, 0}
+    };
+    
     public Audrey() {
         
-        this.vbox = new Box(Orientation.VERTICAL, 0);
-        this.hbox = new Box(Orientation.HORIZONTAL, 0);
+        vbox = new Box(Orientation.VERTICAL, 0);
+        hbox = new Box(Orientation.HORIZONTAL, 0);
         
-        this.scale = new Scale(Orientation.HORIZONTAL, new Adjustment(0, 0, 100, 0.1, 1, 1));
-        this.scale.draw_value = false;
+        scale = new Scale(Orientation.HORIZONTAL, new Adjustment(0, 0, 100, 0.1, 1, 1));
+        scale.draw_value = false;
         
-        this.drawing_area = new DrawingArea();
-        this.drawing_area.set_size_request(640, 360);
+        drawing_area = new DrawingArea();
+        drawing_area.set_size_request(640, 360);
         
-        vbox.pack_start(this.drawing_area, true, true, 0);
+        aspect_frame = new AspectFrame("", (float) 0.5, (float) 0.5, 16/9, true);
+        aspect_frame.set_shadow_type(ShadowType.NONE);
+        aspect_frame.add(drawing_area);
+        
+        vbox.pack_start(aspect_frame, true, true, 0);
         vbox.pack_start(hbox, false, true, 0);
-        
-        controlls();
         
         Gdk.Color bg;
         Gdk.Color.parse("black", out bg);
         
-        this.modify_bg(StateType.NORMAL, bg);
+        modify_bg(StateType.NORMAL, bg);
         
         add(vbox);
         
+        setup_gtk_controlls();
         setup_gst_pipeline();
+        
+        drag_dest_set(this, DestDefaults.ALL, targets, Gdk.DragAction.COPY);
+        drag_data_received.connect(on_drag_data_received);
         
     }
     
@@ -91,7 +103,7 @@ public class Audrey : Window {
         this.playbin.set("uri", uri);
     }
     
-    private void controlls() {
+    private void setup_gtk_controlls() {
         
         btn_play = new PlayPauseButton();
         btn_volu = new VolumeButton();
@@ -113,9 +125,11 @@ public class Audrey : Window {
         
         btn_volu.set_value(1.0);
         
-        btn_play.clicked.connect(on_play);
+        btn_play.clicked.connect(play);
         btn_volu.value_changed.connect(on_volu);
         btn_full.clicked.connect(on_full);
+        
+        show_all();
         
     }
     
@@ -134,7 +148,7 @@ public class Audrey : Window {
         
     }
 
-    private void on_play() {
+    private void play() {
         
         if(btn_play.playing) {
             this.pipeline.set_state(State.PAUSED);
@@ -158,8 +172,21 @@ public class Audrey : Window {
         else { unfullscreen(); }
     }
     
+    private void on_drag_data_received(Widget sender, Gdk.DragContext context, int x, int y, SelectionData selection_data, uint info, uint time_) {
+        
+        string[] uris = selection_data.get_uris();
+        
+        if(uris.length > 0) {
+            stop();
+            set_uri(uris[0]);
+            play();
+        }
+        
+    }
+    
     private void stop() {
         this.pipeline.set_state(State.READY);
+        btn_play.set_playing(false);
     }
     
     public static int main (string[] args) {
@@ -169,8 +196,10 @@ public class Audrey : Window {
         
         var audrey = new Audrey();
         
-        audrey.set_uri("file:///home/linus/Videos/Source Code (2011) DVDRip XviD-MAXSPEED www.torentz.3xforum.ro.avi");
-        audrey.show_all();
+        if(args.length > 1) {
+            audrey.set_uri(args[1]);
+            audrey.play();
+        }
         
         Gtk.main();
         
