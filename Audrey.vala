@@ -62,6 +62,8 @@ public class Audrey : Window {
     private FullscreenButton btn_full;
     private Button btn_sett;
     
+    private bool scale_my_changed = false;
+    
     const TargetEntry[] targets = {
         { "text/uri-list", 0, 0}
     };
@@ -70,9 +72,6 @@ public class Audrey : Window {
         
         vbox = new Box(Orientation.VERTICAL, 0);
         hbox = new Box(Orientation.HORIZONTAL, 0);
-        
-        scale = new Scale(Orientation.HORIZONTAL, new Adjustment(0, 0, 100, 0.1, 1, 1));
-        scale.draw_value = false;
         
         drawing_area = new DrawingArea();
         drawing_area.set_size_request(640, 360);
@@ -105,6 +104,9 @@ public class Audrey : Window {
     
     private void setup_gtk_controlls() {
         
+        scale = new Scale(Orientation.HORIZONTAL, new Adjustment(0, 0, 100, 0.1, 1, 1));
+        scale.draw_value = false;
+        
         btn_play = new PlayPauseButton();
         btn_volu = new VolumeButton();
         btn_full = new FullscreenButton();
@@ -128,6 +130,7 @@ public class Audrey : Window {
         btn_play.clicked.connect(play);
         btn_volu.value_changed.connect(on_volu);
         btn_full.clicked.connect(on_full);
+        scale.value_changed.connect(scale_changed);
         
         show_all();
         
@@ -151,11 +154,12 @@ public class Audrey : Window {
     private void play() {
         
         if(btn_play.playing) {
-            this.pipeline.set_state(State.PAUSED);
+            pipeline.set_state(State.PAUSED);
         } else {
             var xoverlay = this.video as XOverlay;
             xoverlay.set_xwindow_id(Gdk.X11Window.get_xid(this.drawing_area.get_window()));
-            this.pipeline.set_state(State.PLAYING);
+            pipeline.set_state(State.PLAYING);
+            Timeout.add(250, scale_update);
         }
         
         btn_play.set_playing(!btn_play.playing);
@@ -163,7 +167,7 @@ public class Audrey : Window {
     }
     
     private void on_volu(double value) {
-        this.playbin.set("volume", value);
+        playbin.set("volume", value);
     }
     
     private void on_full() {
@@ -184,8 +188,60 @@ public class Audrey : Window {
         
     }
     
+    private void scale_changed() {
+        
+        if(scale_my_changed) {
+            scale_my_changed = false;
+            return ;
+        }
+        
+        if(!btn_play.playing) {
+            return ;
+        }
+        
+        Format fmt = Format.BYTES;
+        int64 duration;
+        
+        if(!playbin.query_duration(ref fmt, out duration)) {
+            return ;
+        }
+        
+        playbin.seek_simple(fmt, SeekFlags.FLUSH, (int64) (((float) scale.adjustment.value / 100) * duration));
+        
+    }
+    
+    private float scale_pos() {
+        
+        Format fmt = Format.BYTES;
+        
+        int64 position;
+        int64 duration;
+        
+        if(!playbin.query_position(ref fmt, out position)) {
+            return 0;
+        }
+        
+        if(!playbin.query_duration(ref fmt, out duration)) {
+            return 0;
+        }
+        
+        return (((float) position / (float) duration) * 100);
+    }
+    
+    private bool scale_update() {
+        
+        if(!btn_play.playing) {
+            return false;
+        }
+        
+        scale_my_changed = true;
+        scale.adjustment.value = scale_pos();
+        
+        return true;
+    }
+    
     private void stop() {
-        this.pipeline.set_state(State.READY);
+        pipeline.set_state(State.READY);
         btn_play.set_playing(false);
     }
     
