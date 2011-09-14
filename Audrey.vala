@@ -96,6 +96,8 @@ public class Audrey : Window {
         drag_dest_set(this, DestDefaults.ALL, targets, Gdk.DragAction.COPY);
         drag_data_received.connect(on_drag_data_received);
         
+        destroy.connect(Gtk.main_quit);
+        
     }
     
     public void set_uri(string uri) {
