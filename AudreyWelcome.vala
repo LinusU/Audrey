@@ -64,11 +64,6 @@ public class AudreyWelcome : Fixed {
         btn_disc.clicked.connect(on_disc);
         btn_ejec.clicked.connect(on_ejec);
         
-        Gdk.Color bg;
-        Gdk.Color.parse("#F3F3F3", out bg);
-        
-        modify_bg(StateType.NORMAL, bg);
-        
         size_allocate.connect(resized);
         //check_resize.connect(resized);
         

@@ -5,6 +5,9 @@ public class Audrey : Window {
     private AudreyWelcome welcome;
     private AudreyPlayer player;
     
+    private Gdk.Color bg_w;
+    private Gdk.Color bg_p;
+    
     private int mode = 0;
     
     const TargetEntry[] targets = {
@@ -35,6 +38,7 @@ public class Audrey : Window {
         
         if(welcome == null) {
             welcome = new AudreyWelcome();
+            Gdk.Color.parse("#EEE", out bg_w);
         }
         
         if(mode == 2) {
@@ -43,6 +47,7 @@ public class Audrey : Window {
         }
         
         if(mode != 1) {
+            modify_bg(StateType.NORMAL, bg_w);
             add(welcome);
         }
         
@@ -54,6 +59,7 @@ public class Audrey : Window {
         
         if(player == null) {
             player = new AudreyPlayer();
+            Gdk.Color.parse("#000", out bg_p);
         }
         
         if(mode == 1) {
@@ -61,6 +67,7 @@ public class Audrey : Window {
         }
         
         if(mode != 2) {
+            modify_bg(StateType.NORMAL, bg_p);
             add(player);
         }
         

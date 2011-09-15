@@ -77,11 +77,6 @@ public class AudreyPlayer : VBox {
         pack_start(aspect_frame, true, true, 0);
         pack_start(box, false, true, 0);
         
-        Gdk.Color bg;
-        Gdk.Color.parse("black", out bg);
-        
-        modify_bg(StateType.NORMAL, bg);
-        
         setup_gtk_controlls();
         setup_gst_pipeline();
         
