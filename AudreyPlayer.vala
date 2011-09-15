@@ -49,11 +49,11 @@ public class AudreyPlayer : VBox {
     private AspectFrame aspect_frame;
     private DrawingArea drawing_area;
     
-    private Pipeline pipeline;
     private Element playbin;
-    
     private Element audio;
     private Element video;
+    
+    private X.ID xid;
     
     private PlayPauseButton btn_play;
     private VolumeButton btn_volu;
@@ -61,6 +61,7 @@ public class AudreyPlayer : VBox {
     private Button btn_sett;
     
     private bool scale_my_changed = false;
+    private bool start_play_on_realize = false;
     
     public AudreyPlayer() {
         
@@ -68,7 +69,7 @@ public class AudreyPlayer : VBox {
         
         drawing_area = new DrawingArea();
         drawing_area.set_size_request(640, 360);
-        drawing_area.realize.connect(embed_video);
+        drawing_area.realize.connect(on_realize);
         
         aspect_frame = new AspectFrame("", (float) 0.5, (float) 0.5, 16/9, true);
         aspect_frame.set_shadow_type(ShadowType.NONE);
@@ -119,17 +120,31 @@ public class AudreyPlayer : VBox {
     
     private void setup_gst_pipeline () {
         
-        pipeline = new Pipeline("audrey");
-        
         playbin = ElementFactory.make("playbin2", "playbin");
         video = ElementFactory.make("xvimagesink", "video");
         audio = ElementFactory.make("autoaudiosink", "audio");
         
-        pipeline.add(this.playbin);
-        
         playbin.set("video-sink", this.video);
         playbin.set("audio-sink", this.audio);
         
+        playbin.get_bus().set_sync_handler(on_bus_callback);
+        
+    }
+    
+    private void on_realize() {
+        xid = Gdk.X11Window.get_xid(drawing_area.get_window());
+        if(start_play_on_realize) { play(); }
+    }
+    
+    private BusSyncReply on_bus_callback(Gst.Bus bus, Gst.Message message) {
+        
+        if(message.get_structure() != null && message.get_structure().has_name("prepare-xwindow-id")) {
+            var xoverlay = message.src as Gst.XOverlay;
+            xoverlay.set_xwindow_id(xid);
+            return BusSyncReply.DROP;
+        }
+        
+        return BusSyncReply.PASS;
     }
     
     private void on_volu(double value) {
@@ -199,11 +214,6 @@ public class AudreyPlayer : VBox {
         return true;
     }
     
-    private void embed_video() {
-        var xoverlay = video as XOverlay;
-        xoverlay.set_xwindow_id(Gdk.X11Window.get_xid(drawing_area.get_window()));
-    }
-    
     public void set_uri(string uri) {
         stop();
         playbin.set("uri", uri);
@@ -212,17 +222,18 @@ public class AudreyPlayer : VBox {
     
     public void play() {
         
-        if(btn_play.playing) {
-            pipeline.set_state(State.PAUSED);
+        if(drawing_area.get_realized()) {
+            start_play_on_realize = false;
         } else {
-            
-            if(drawing_area.get_realized()) {
-                embed_video();
-            }
-            
-            pipeline.set_state(State.PLAYING);
+            start_play_on_realize = true;
+            return ;
+        }
+        
+        if(btn_play.playing) {
+            playbin.set_state(State.PAUSED);
+        } else {
+            playbin.set_state(State.PLAYING);
             Timeout.add(250, scale_update);
-            
         }
         
         btn_play.set_playing(!btn_play.playing);
@@ -230,7 +241,7 @@ public class AudreyPlayer : VBox {
     }
     
     public void stop() {
-        pipeline.set_state(State.READY);
+        playbin.set_state(State.READY);
         btn_play.set_playing(false);
     }
     
