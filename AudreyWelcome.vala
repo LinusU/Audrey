@@ -35,17 +35,17 @@ public class AudreyWelcome : Fixed {
         
         Box b;
         
-        b = new Box(Orientation.VERTICAL, 4);
+        b = new Box(Orientation.VERTICAL, 0);
         b.pack_start(new Image.from_stock(Stock.OPEN, IconSize.DIALOG));
         b.pack_start(new Label("Open File"));
         btn_file.add(b);
         
-        b = new Box(Orientation.VERTICAL, 4);
+        b = new Box(Orientation.VERTICAL, 0);
         b.pack_start(new Image.from_stock(Stock.CDROM, IconSize.DIALOG));
         b.pack_start(new Label("Open Disc"));
         btn_disc.add(b);
         
-        b = new Box(Orientation.VERTICAL, 4);
+        b = new Box(Orientation.VERTICAL, 0);
         b.pack_start(new Image.from_stock("gtk-media-eject", IconSize.DIALOG));
         b.pack_start(new Label("Eject Media"));
         btn_ejec.add(b);
@@ -54,11 +54,11 @@ public class AudreyWelcome : Fixed {
         put(btn_disc, 0, 0);
         put(btn_ejec, 0, 0);
         
-        set_size_request(480, 196);
+        set_size_request(480, 180);
         
-        btn_file.set_size_request(160, 196);
-        btn_disc.set_size_request(160, 196);
-        btn_ejec.set_size_request(160, 196);
+        btn_file.set_size_request(128, 180);
+        btn_disc.set_size_request(128, 180);
+        btn_ejec.set_size_request(128, 180);
         
         btn_file.clicked.connect(on_file);
         btn_disc.clicked.connect(on_disc);
@@ -79,11 +79,11 @@ public class AudreyWelcome : Fixed {
     private void resized(Allocation allocation) {
         
         int startx = (int) ((get_allocated_width() - 480) / 2);
-        int starty = (int) ((get_allocated_height() - 196) / 2);
+        int starty = (int) ((get_allocated_height() - 180) / 2);
         
         move(btn_file, startx +   0, starty + 0);
-        move(btn_disc, startx + 160, starty + 0);
-        move(btn_ejec, startx + 320, starty + 0);
+        move(btn_disc, startx + 176, starty + 0);
+        move(btn_ejec, startx + 352, starty + 0);
         
         //queue_draw();
         //queue_resize();
