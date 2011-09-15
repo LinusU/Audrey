@@ -88,8 +88,7 @@ public class AudreyWelcome : Fixed {
     }
     
     private void play(string uri) {
-        Audrey app = get_parent() as Audrey;
-        app.show_player(uri);
+        (get_parent() as Audrey).show_player(uri);
     }
     
     private void on_file() {
