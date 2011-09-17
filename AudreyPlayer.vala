@@ -103,7 +103,7 @@ public class AudreyPlayer : VBox {
         btn_sett.relief = ReliefStyle.NONE;
         
         box.pack_start(btn_play, false, true, 0);
-        box.pack_start(this.scale, true, true, 0);
+        box.pack_start(scale, true, true, 0);
         box.pack_start(btn_volu, false, true, 0);
         box.pack_start(btn_full, false, true, 0);
         box.pack_start(btn_sett, false, true, 0);
