@@ -60,6 +60,7 @@ public class AudreyPlayer : VBox {
     private FullscreenButton btn_full;
     private Button btn_sett;
     
+    private uint hide_controlls_timeout = 0;
     private bool scale_my_changed = false;
     private bool start_play_on_realize = false;
     
@@ -78,11 +79,38 @@ public class AudreyPlayer : VBox {
         pack_start(aspect_frame, true, true, 0);
         pack_start(box, false, true, 0);
         
+        drawing_area.set_events(Gdk.EventMask.POINTER_MOTION_MASK);
+        drawing_area.motion_notify_event.connect(motion);
+        
         setup_gtk_controlls();
         setup_gst_pipeline();
         
         show_all();
         
+    }
+    
+    private bool motion(Gdk.EventMotion event) {
+        
+        if(!btn_full.fullscreen) {
+            return true;
+        }
+        
+        if(box.get_parent() == null) {
+            pack_start(box, false, true, 0);
+        }
+        
+        if(hide_controlls_timeout != 0) {
+            Source.remove(hide_controlls_timeout);
+            hide_controlls_timeout = 0;
+        }
+        
+        hide_controlls_timeout = Timeout.add(2500, () => {
+            remove(box);
+            hide_controlls_timeout = 0;
+            return false;
+        });
+        
+        return true;
     }
     
     private void setup_gtk_controlls() {
