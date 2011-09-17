@@ -124,8 +124,8 @@ public class AudreyPlayer : VBox {
         video = ElementFactory.make("xvimagesink", "video");
         audio = ElementFactory.make("autoaudiosink", "audio");
         
-        playbin.set("video-sink", this.video);
-        playbin.set("audio-sink", this.audio);
+        playbin.set("video-sink", video);
+        playbin.set("audio-sink", audio);
         
         playbin.get_bus().set_sync_handler(on_bus_callback);
         
