@@ -11,16 +11,18 @@ The Audrey project is licensed under the MIT license, which is available in the 
 
 Credits
 -------
-(C) Linus "LinusU" Unnebäck 2011 <linus@folkdatorn.se> # Main Developer
-(C) Emil "sakjur" Tullstedt 2011 <emil@tullstedt.se> # Core Developer
+
+- Linus "LinusU" Unnebäck 2011 <linus@folkdatorn.se> # Main Developer
+- Emil "sakjur" Tullstedt 2011 <emil@tullstedt.se> # Core Developer
 
 Dependencies
 ------------
 The compiling of Audrey requires access to:
-* gtk+-3.0
-* gdk-x11-3.0
-* gstreamer-0.10
-* gstreamer-interfaces-0.1
-* valac
 
-Please report any issue at http://github.com/LinusU/Audrey or send an email to <emil@tullstedt.se>
+- gtk+-3.0
+- gdk-x11-3.0
+- gstreamer-0.10
+- gstreamer-interfaces-0.1
+- valac
+
+Please report any issue at our [GitHub Page](http://github.com/LinusU/Audrey) or send an email to <emil@tullstedt.se>
