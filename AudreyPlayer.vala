@@ -149,7 +149,7 @@ public class AudreyPlayer : VBox {
     private void setup_gst_pipeline () {
         
         playbin = ElementFactory.make("playbin2", "playbin");
-        video = ElementFactory.make("xvimagesink", "video");
+        video = ElementFactory.make("autovideosink", "video");
         audio = ElementFactory.make("autoaudiosink", "audio");
         
         playbin.set("video-sink", video);
@@ -180,10 +180,18 @@ public class AudreyPlayer : VBox {
     }
     
     private void on_full() {
+        
         Window win = get_parent() as Window;
         btn_full.set_fullscreen(!btn_full.fullscreen);
+        
         if(btn_full.fullscreen) { win.fullscreen(); }
         else { win.unfullscreen(); }
+        
+        if(hide_controlls_timeout != 0) {
+            Source.remove(hide_controlls_timeout);
+            hide_controlls_timeout = 0;
+        }
+        
     }
     
     private void on_sett() {
